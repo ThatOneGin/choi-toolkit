@@ -1,0 +1,17 @@
+; one of the many ways to do a loop
+
+@proc end
+  halt
+@proc main
+  push R1 1  ; increment
+  push R2 0  ; init value
+  push R3 10 ; maximum value
+@proc for
+  dump R2
+  cmp R2 R3
+  ; end loop if R2 == R3
+  jz end
+  ; increment R2
+  inc R2
+  ; start over again
+  jmp for

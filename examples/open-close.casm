@@ -1,0 +1,19 @@
+; syscall open, read and close testing
+
+@proc main
+  ; open file
+  push R1 3
+  push R2 0
+  @mem R3 "hello.txt"
+  syscall
+  
+  ; read 12 bytes of the file
+  mov R2 R1
+  push R1 2
+  push R3 12
+  syscall
+
+  ; write file to stdout and close it
+  write R1
+  push R1 4
+  syscall
