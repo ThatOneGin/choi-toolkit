@@ -25,7 +25,7 @@ struct cinc_state {
 };
 
 struct cinc_state open_state();
-void close(int code, struct cinc_state cs);
+void close_state(int code, struct cinc_state cs);
 struct object search_by_name(struct cinc_state cs, char *name);
 struct object *peek(struct cinc_state *cs, int pos);
 struct object *gettop(struct cinc_state *cs);

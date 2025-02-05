@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "arena.h"
 
+#define maxloop 1000
 #define max_program_size 1000
 #define choi_version 01
 #define magic_number 255
@@ -80,8 +81,11 @@ typedef struct {
 gsb_vm gsb_vm_init(Arena arena);
 void push_vm(gsb_vm *vm, int value);
 int pop_vm(gsb_vm *vm);
+void ret_push_vm(gsb_vm *vm, int value);
+int ret_pop_vm(gsb_vm *vm);
 void exec(gsb_vm *vm, instruction i);
 void dump_registers(gsb_vm vm);
 void dump_stack(gsb_vm vm);
 void set_registers_to_zero(gsb_vm *vm);
+void vm_write(gsb_vm *vm, int len);
 #endif

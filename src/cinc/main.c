@@ -13,12 +13,34 @@
 #include "base.c"
 #include "gen.c"
 #include "../io.c"
+#include "../arena.c"
+#include "../exec.c"
+#include "../syscall.c"
 
+gsb_vm vm_init(Arena arena) {
+  gsb_vm vm;
+  vm.ip = 0;
 
+  vm.stack = alloc(&arena, 1024);
+  vm.sp = 0;
+  
+  vm.ret_stack = alloc(&arena, 100);
+  vm.ret_sp = 0;
+
+  if (vm.ret_stack == NULL) {
+    free(arena.mem);
+    exit(1);
+  }
+  return vm;
+}
 
 int main(int argc, char **argv) {
   atexit(cinc_free_arena);
   cinc_init_arena();
+  
+  Arena vm_arena = init_arena(2048);
+  gsb_vm vm = vm_init(vm_arena);
+
   struct cinc_state cs = open_state();
   registry_base(&cs);
 
@@ -40,7 +62,10 @@ int main(int argc, char **argv) {
   ch.program_size = ca.program_size;
   ch.version = 01;
 
-  writefile("a.choivm", ca.program, ca, ch);
+  for (size_t i = 0; i < ca.program_size; i++) {
+    exec(&vm, ca.program[i]);
+  }
 
+  free(vm_arena.mem);
   return 0;
 }
