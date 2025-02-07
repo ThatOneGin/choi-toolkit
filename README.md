@@ -65,6 +65,22 @@ subtract two registers as integers
   sub R1 R2
 ```
 
+```div```
+
+divide two registers as integers.
+
+```
+  div R1 R2
+```
+
+```mul```
+
+multiply two registers as integers.
+
+```
+  mul R1 R2
+```
+
 ```dump```
 
 dump a register to stdout as integer

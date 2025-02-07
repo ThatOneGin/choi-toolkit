@@ -67,6 +67,14 @@ void exec(gsb_vm *vm, instruction i) {
     vm->registers[i.arg1] = (value) {.as_int = vm->registers[i.arg1].as_int + vm->registers[i.arg2].as_int};
 		vm->ip += 1;
     break;
+  case OP_DIV:
+    vm->registers[i.arg1] = (value) {.as_int = vm->registers[i.arg1].as_int / vm->registers[i.arg2].as_int};
+		vm->ip += 1;
+    break;
+  case OP_MUL:
+    vm->registers[i.arg1] = (value) {.as_int = vm->registers[i.arg1].as_int * vm->registers[i.arg2].as_int};
+		vm->ip += 1;
+    break;
   case OP_SUB:
     vm->registers[i.arg1] = (value) {.as_int = vm->registers[i.arg1].as_int - vm->registers[i.arg2].as_int};
 		vm->ip += 1;

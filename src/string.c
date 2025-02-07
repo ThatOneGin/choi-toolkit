@@ -221,6 +221,18 @@ instruction parse_line(Str ln, label_table *lb, size_t ip) {
     int reg2 = parse_register(str_trims(ln));
 
     return (instruction){.opcode = OP_SUB, .operand = {.as_int = 0},.arg1 = reg1, .arg2 = reg2};
+  } else if (str_cmp(i_n, to_str("mul"))) {
+    ln = str_triml(ln);
+    int reg1 = parse_register(str_trimlr(ln));
+    int reg2 = parse_register(str_trims(ln));
+
+    return (instruction){.opcode = OP_MUL, .operand = {.as_int = 0},.arg1 = reg1, .arg2 = reg2};
+  } else if (str_cmp(i_n, to_str("div"))) {
+    ln = str_triml(ln);
+    int reg1 = parse_register(str_trimlr(ln));
+    int reg2 = parse_register(str_trims(ln));
+
+    return (instruction){.opcode = OP_DIV, .operand = {.as_int = 0},.arg1 = reg1, .arg2 = reg2};
   } else if (str_cmp(i_n, to_str("dump"))) {
     ln = str_triml(ln);
     int reg = parse_register(str_triml(ln));

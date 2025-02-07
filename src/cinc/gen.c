@@ -20,7 +20,6 @@ void insert_to_program(choi_header *ch, choi_asm *ca, cinc_expr node) {
       inst(OP_POP_STACK, 0, 1, 0);
 
       switch (node.value.as_binary_op->op) {
-        default:
         case '+':
           ca->program[ca->program_size++] =
           inst(OP_ADD, 0, 0, 1);
@@ -30,6 +29,18 @@ void insert_to_program(choi_header *ch, choi_asm *ca, cinc_expr node) {
         case '-':
           ca->program[ca->program_size++] =
           inst(OP_SUB, 0, 0, 1);
+          ca->program[ca->program_size++] =
+          inst(OP_PUSH_STACK, 0, 1, 0);
+          break;
+        case '*':
+          ca->program[ca->program_size++] =
+          inst(OP_MUL, 0, 0, 1);
+          ca->program[ca->program_size++] =
+          inst(OP_PUSH_STACK, 0, 1, 0);
+          break;
+        case '/':
+          ca->program[ca->program_size++] =
+          inst(OP_DIV, 0, 0, 1);
           ca->program[ca->program_size++] =
           inst(OP_PUSH_STACK, 0, 1, 0);
           break;
