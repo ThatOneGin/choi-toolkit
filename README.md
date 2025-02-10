@@ -223,6 +223,4 @@ push will push a value to a register
 
 - [ ] handle strings like a sane person.
 
-- [ ] make cinc be a complete interface with 100% control to the bytecode generated.
-
 - [ ] a debugger for the bytecode.
