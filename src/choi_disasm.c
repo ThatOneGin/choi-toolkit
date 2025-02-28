@@ -1,6 +1,5 @@
 #include "choivm.h"
 #include "io.h"
-#include "io.c"
 #include <stdio.h>
 #include <stdlib.h>
 

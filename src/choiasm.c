@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include "choivm.h"
 #include "io.h"
-#include "string.c"
-#include "io.c"
 #include "arena.h"
-#include "arena.c"
 
 int main(int argc, char **argv) {
   if (argc < 2) {

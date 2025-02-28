@@ -3,14 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "arena.h"
-#include "io.c"
 #include "choivm.h"
 #include "io.h"
-#include "io.h"
 #include "string.h"
-#include "arena.c"
-#include "syscall.c"
-#include "exec.c"
 
 gsb_vm gsb_vm_init(Arena arena) {
   gsb_vm vm;

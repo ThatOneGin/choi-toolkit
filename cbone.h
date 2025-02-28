@@ -40,19 +40,27 @@ typedef HANDLE fd;
 #endif
 
 #ifdef __GNUC__
-  #define cc "gcc"
+  #ifndef cc
+    #define cc "gcc"
+  #endif
 #endif
 
 #ifdef __clang__
-  #define cc "clang"
+  #ifndef cc
+    #define cc "clang"
+  #endif
 #endif
 
 #ifdef __MSC_VER
-  #define cc "cl.exe"
+  #ifndef cc
+    #define cc "cl.exe"
+  #endif
 #endif
 
 #ifndef cc
-  #define cc "cc"
+  #ifndef cc
+    #define cc "cc"
+  #endif
 #endif
 
 #include <assert.h>
@@ -62,8 +70,9 @@ typedef HANDLE fd;
 #include <string.h>
 
 typedef struct {
-  char **elm;
+  char **items;
   size_t size;
+  size_t capacity;
 } Str_Array;
 
 typedef struct {
@@ -86,7 +95,91 @@ void assert_with_errmsg(int expr, char *errmsg);
   do {                                                                         \
     Build_Arg arg = {.data = make_str_array(__VA_ARGS__, NULL)};               \
     run_cmd(arg);                                                              \
-    free(arg.data.elm);                                                        \
+    free(arg.data.items);                                                      \
+  } while (0)
+
+/*
+**Dynamic arrays for utilities
+
+DA_DEFAULT_CAP: minimum capacity for arrays (customizable)
+DA_ASSERT: assertion method used in errors
+
+DA_FREE: free an dynamic array.
+
+DA_PUSH: push an element to the front of an array
+
+DA_POP: remove an element on the front of the array.
+
+DA_PUSH_AT: push an element at position (adjust others to fit)
+
+DA_POP_AT: remove an element at position (adjust others to fill)
+
+DA_GET: gets an element at given position, if the position is greater
+than the size, it will give the last element. Otherwise if it underflows, the
+first.
+*/
+
+#ifndef DA_DEFAULT_CAP
+#define DA_DEFAULT_CAP 64
+#endif
+
+#ifndef DA_ASSERT
+#define DA_ASSERT assert
+#endif
+
+#define LOG(pref, str) (fprintf(stdout, pref str))
+#define ERROR(msg) LOG("Error:", msg)
+
+#define DA_FREE(arr)                                                           \
+  do {                                                                         \
+    if (arr.size > 0 && arr.capacity > 0) {                                    \
+      free(arr.items);                                                         \
+    }                                                                          \
+  } while (0)
+
+#define DA_PUSH(arr, elm)                                                      \
+  do {                                                                         \
+    if (arr.size >= arr.capacity) {                                            \
+      if (arr.capacity == 0)                                                   \
+        arr.capacity = DA_DEFAULT_CAP;                                         \
+      else                                                                     \
+        arr.capacity *= 2;                                                     \
+      arr.items = realloc(arr.items, arr.capacity * sizeof(*arr.items));       \
+      if (arr.items == NULL) {                                                 \
+        ERROR("DA_PUSH fail: Realloc Error.");                                 \
+        exit(1);                                                               \
+      }                                                                        \
+    }                                                                          \
+    arr.items[arr.size++] = (elm);                                             \
+  } while (0)
+
+#define DA_POP(arr)                                                            \
+  do {                                                                         \
+    if (arr.capacity > 0 && arr.size > 0) {                                    \
+      arr.size--;                                                              \
+    }                                                                          \
+  } while (0)
+
+#define DA_POP_AT(arr, pos)                                                    \
+  do {                                                                         \
+    if ((pos) < arr.size) {                                                    \
+      for (size_t i = (pos); i < (size_t)arr.size - 1; i++) {                  \
+        arr.items[i] = arr.items[i + 1];                                       \
+      }                                                                        \
+      arr.size--;                                                              \
+    }                                                                          \
+  } while (0)
+
+#define DA_GET(arr, pos) ((pos) >= 0 ? arr.size > (pos) ? arr.items[(pos)] : arr.items[arr.size - 1] : arr.items[0])
+
+#define DA_PUSH_AT(arr, elm, pos)                                              \
+  do {                                                                         \
+    if (arr.size + (pos) < arr.capacity) {                                     \
+      for (size_t i = arr.size; i > pos; i--) {                                \
+        arr.items[i] = arr.items[i - 1];                                       \
+      }                                                                        \
+      arr.items[pos] = elm;                                                    \
+    }                                                                          \
   } while (0)
 
 char *str_concat(char *s1, char *s2) {
@@ -127,18 +220,18 @@ Str_Array make_str_array(char *first, ...) {
   }
   va_end(args);
 
-  result.elm = malloc(sizeof(result.elm[0]) * result.size + 1);
-  assert_with_errmsg(result.elm != NULL,
+  result.items = malloc(sizeof(result.items[0]) * result.size);
+  assert_with_errmsg(result.items != NULL,
                      "Couldn't allocate memory for string array.");
 
   result.size = 0;
 
-  result.elm[result.size++] = first;
+  result.items[result.size++] = first;
 
   va_start(args, first);
   for (char *next = va_arg(args, char *); next != NULL;
-      next = va_arg(args, char *)) {
-    result.elm[result.size++] = next;
+       next = va_arg(args, char *)) {
+    result.items[result.size++] = next;
   }
   va_end(args);
 
@@ -146,15 +239,15 @@ Str_Array make_str_array(char *first, ...) {
 }
 
 Str_Array str_array_push(Str_Array s_arr, char *str) {
-  Str_Array result = {.size = s_arr.size};
+  Str_Array result = {.size = s_arr.size + 1};
 
-  result.elm = malloc(result.size);
-  assert_with_errmsg(result.elm != NULL,
+  result.items = malloc(result.size);
+  assert_with_errmsg(result.items != NULL,
                      "Coudln't push string to string array.");
 
-  memcpy(result.elm, s_arr.elm, s_arr.size);
+  memcpy(result.items, s_arr.items, s_arr.size);
 
-  result.elm[s_arr.size] = str;
+  result.items[s_arr.size] = str;
 
   return result;
 }
@@ -167,7 +260,7 @@ char *concat_str_array(char *sep, Str_Array s) {
   size_t sep_len = strlen(sep);
   size_t len = 0;
   for (size_t i = 0; i < s.size; i++) {
-    len += strlen(s.elm[i]);
+    len += strlen(s.items[i]);
     if (i < s.size - 1) {
       len += sep_len;
     }
@@ -179,7 +272,7 @@ char *concat_str_array(char *sep, Str_Array s) {
   result[0] = '\0';
 
   for (size_t i = 0; i < s.size; i++) {
-    strcat(result, s.elm[i]);
+    strcat(result, s.items[i]);
     if (i < s.size - 1) {
       strcat(result, sep);
     }
@@ -198,7 +291,8 @@ int run_cmd(Build_Arg arg) {
     perror("fork");
     return 1;
   } else if (pid == 0) {
-    execvp(arg.data.elm[0], (char *const *)arg.data.elm);
+    DA_PUSH(arg.data, NULL);
+    execvp(arg.data.items[0], (char *const *)arg.data.items);
 
     perror("execvp");
     return 1;
@@ -295,14 +389,14 @@ int modified_after(char *f1, char *f2) {
 }
 
 #define REBUILD_SELF(argc, argv)                                               \
-  {                                                                            \
+  do {                                                                         \
     assert_with_errmsg(argc >= 1, "no args... how?");                          \
     char *src_file = __FILE__;                                                 \
     char *target = argv[0];                                                    \
-                                                                               \
     if (modified_after(src_file, target)) {                                    \
       CMD(cc, "-o", target, src_file);                                         \
     }                                                                          \
-  }
+  } while (0)
+
 #endif // CBONE_IMPL
 #endif // CBONE_H

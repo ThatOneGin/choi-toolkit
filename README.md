@@ -1,7 +1,7 @@
 # Choi VM
 
 Choivm is a virtual machine with a goal of being small and portable.
-It has its own assembly language called choi assembly. (a interface with no abstraction for its bytecode)
+It has its own assembly language called casm (choi assembly, a interface with pratically no abstraction for its bytecode)
 
 ## Building:
 
@@ -11,11 +11,11 @@ Compile cbone.c and execute.
 $ cc -o cbone cbone.c && ./cbone
 ```
 
-Executing cbone will generate 3 executables in build directory
+Executing cbone will generate these following 3 executables:
 
-choivm: the virtual machine interpreter.
+choivm: the virtual machine bytecode interpreter.
 
-choiasm: the assembler.
+choiasm: the assembly compiler.
 
 choi_disasm: the disassembler.
 
