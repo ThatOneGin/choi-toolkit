@@ -1,7 +1,7 @@
 #ifndef choi_io_H
 #define choi_io_H
 #include "choivm.h"
-#include "string.h"
+#include "parser.h"
 #include <stdio.h>
 
 Str openfile(char *filepath);

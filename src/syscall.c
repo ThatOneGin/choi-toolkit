@@ -18,9 +18,9 @@ int check_for_syscall_kind(gsb_vm *vm) {
       vm->registers[0].as_int = write(vm->registers[1].as_int, vm->memory + pop_vm(vm), vm->registers[2].as_int);
       return 0;
     case choi_read:
-      push_vm(vm, vm->memory_size);
-      vm->registers[0].as_int = read(vm->registers[1].as_int, vm->memory + vm->memory_size, vm->registers[2].as_int);
-      vm->memory_size += (size_t) vm->registers[2].as_int;
+      push_vm(vm, vm->size);
+      vm->registers[0].as_int = read(vm->registers[1].as_int, vm->memory + vm->size, vm->registers[2].as_int);
+      vm->size += (size_t) vm->registers[2].as_int;
       return 0;
     case choi_open:
       sprintf(filename, "%.*s", vm->registers[2].as_int, vm->memory + pop_vm(vm));

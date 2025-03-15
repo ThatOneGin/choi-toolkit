@@ -7,7 +7,7 @@
 #define max_program_size 1000
 #define choi_version 01
 #define magic_number 255
-#define vm_memory_capacity 2 * 1000
+#define vm_capacity 2 * 1000
 
 enum Registers {
   r1,
@@ -31,7 +31,7 @@ typedef struct {
   int version;
   int entry;
   size_t program_size;
-  size_t memory_size;
+  size_t size;
 }choi_header;
 
 typedef struct {
@@ -76,8 +76,8 @@ typedef struct {
   size_t ip;
   instruction *program;
 
-  unsigned char memory[vm_memory_capacity];
-  size_t memory_size;
+  unsigned char memory[vm_capacity];
+  size_t size;
 }gsb_vm;
 
 gsb_vm gsb_vm_init(Arena arena);

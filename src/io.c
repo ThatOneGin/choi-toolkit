@@ -85,11 +85,11 @@ choi_header readprogram(gsb_vm *vm, char *filename) {
     i++;
   }
 
-  fread(vm->memory, sizeof(vm->memory[0]), ch.memory_size, f);
+  fread(vm->memory, sizeof(vm->memory[0]), ch.size, f);
 
   fclose(f);
   vm->program = program;
-  vm->memory_size = ch.memory_size;
+  vm->size = ch.size;
   return ch;
 }
 
@@ -103,7 +103,7 @@ void writefile(const char *filename, instruction *program, choi_asm ca, choi_hea
 
   fwrite(&ch, sizeof(choi_header), 1, f);
   fwrite(program, sizeof(instruction), ch.program_size, f);
-  fwrite(ca.memory, sizeof(ca.memory[0]), ca.memory_size, f);
+  fwrite(ca.memory, sizeof(*ca.memory), ca.size, f);
 
   if (ferror(f)) {
     perror("Error: Couldnt't write to file ");

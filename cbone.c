@@ -2,9 +2,10 @@
 #include "cbone.h"
 
 #define CFLAGS "-ggdb", "-Wall", "-Wextra", "-Werror", "-pedantic-errors", "-std=c99", "-Wno-missing-braces"
-#define FILES "string", "arena", "io", "exec", "syscall", "choi_disasm", "choiasm", "choivm"
+#define FILES "parser", "string", "arena", "io", "exec", "syscall", "choi_disasm", "choiasm", "choivm"
 #define BUILD_DIR "build"
 #define OBJFILES \
+  BUILD_DIR path_sep "parser.o", \
   BUILD_DIR path_sep "string.o", \
   BUILD_DIR path_sep "arena.o", \
   BUILD_DIR path_sep "io.o", \
@@ -15,15 +16,15 @@ static char *files[] = {
   FILES
 };
 
-#define nfiles 8
+#define nfiles 9
 
 void build_objfile(char *tool) {
-  Str_Array buildsep = make_str_array("build", CONCAT(tool, ".o"), NULL);
-  Str_Array target = make_str_array(tool, ".c", NULL);
-  char *aspath = concat_str_array(path_sep, buildsep);
-  char *targetdotc = concat_str_array("", target);
-  Str_Array srcpath = make_str_array("src", targetdotc, NULL);
-  char *srcdotc = concat_str_array(path_sep, srcpath);
+  Str_Array buildsep = cbone_make_str_array("build", CONCAT(tool, ".o"), NULL);
+  Str_Array target = cbone_make_str_array(tool, ".c", NULL);
+  char *aspath = cbone_concat_str_array(path_sep, buildsep);
+  char *targetdotc = cbone_concat_str_array("", target);
+  Str_Array srcpath = cbone_make_str_array("src", targetdotc, NULL);
+  char *srcdotc = cbone_concat_str_array(path_sep, srcpath);
 
   CMD(cc, "-c", "-o", aspath, srcdotc, CFLAGS);
 

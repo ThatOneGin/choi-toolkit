@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "choivm.h"
 #include "io.h"
+#include "parser.h"
 #include "arena.h"
 
 int main(int argc, char **argv) {
@@ -21,14 +22,14 @@ int main(int argc, char **argv) {
   choi_asm ca = {
     .lb = lb,
     .program = {0},
-    .memory = {0},
-    .memory_capacity = vm_memory_capacity,
+    // memory_cap
+    .capacity = 0,
     .program_capacity = 1000,
   };
 
   size_t psize = parse_file(src, &ca, &ch, &strbuffer);
   ch.program_size = psize;
-  ch.memory_size = ca.memory_size;
+  ch.size = ca.size;
 
   writefile("a.choivm", ca.program, ca, ch);
 

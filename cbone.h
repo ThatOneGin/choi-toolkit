@@ -34,6 +34,7 @@ typedef int fd;
 #define path_sep "/"
 #else
 #include <process.h>
+#include <direct.h>
 #include <windows.h>
 typedef HANDLE fd;
 #define path_sep "\\"
@@ -77,26 +78,18 @@ typedef struct {
 
 typedef struct {
   Str_Array data;
-} Build_Arg;
+} Cmd;
 
-int run_cmd(Build_Arg arg);
-int modified_after(char *f1, char *f2);
-Str_Array make_str_array(char *first, ...);
-char *concat_str_array(char *delim, Str_Array s);
-void print_cmd(char *cmd);
-void info_cmd(char *msg);
-void assert_with_errmsg(int expr, char *errmsg);
-
-#ifdef CBONE_IMPL
-
-#define PATH(...) concat_str_array(path_sep, make_str_array(__VA_ARGS__, NULL))
-#define CONCAT(...) concat_str_array("", make_str_array(__VA_ARGS__, NULL))
-#define CMD(...)                                                               \
-  do {                                                                         \
-    Build_Arg arg = {.data = make_str_array(__VA_ARGS__, NULL)};               \
-    run_cmd(arg);                                                              \
-    free(arg.data.items);                                                      \
-  } while (0)
+int cbone_run_cmd(Cmd arg);
+int cbone_modified_after(char *f1, char *f2);
+Str_Array cbone_make_str_array(char *first, ...);
+char *cbone_concat_str_array(char *delim, Str_Array s);
+void cbone_print_cmd(char *cmd);
+void cbone_info_cmd(char *msg);
+void cbone_assert_with_errmsg(int expr, char *errmsg);
+int cbone_dir_exists(Str_Array Array_path);
+int cbone_mkdir(char *path);
+int cbone_rmdir(char *path);
 
 /*
 **Dynamic arrays for utilities
@@ -137,54 +130,66 @@ first.
     }                                                                          \
   } while (0)
 
-#define DA_PUSH(arr, elm)                                                      \
-  do {                                                                         \
-    if (arr.size >= arr.capacity) {                                            \
-      if (arr.capacity == 0)                                                   \
-        arr.capacity = DA_DEFAULT_CAP;                                         \
-      else                                                                     \
-        arr.capacity *= 2;                                                     \
-      arr.items = realloc(arr.items, arr.capacity * sizeof(*arr.items));       \
-      if (arr.items == NULL) {                                                 \
-        ERROR("DA_PUSH fail: Realloc Error.");                                 \
-        exit(1);                                                               \
-      }                                                                        \
-    }                                                                          \
-    arr.items[arr.size++] = (elm);                                             \
-  } while (0)
+#define DA_PUSH(arr, elm)                                                    \
+do {                                                                         \
+  if (arr.size >= arr.capacity) {                                            \
+    if (arr.capacity == 0)                                                   \
+      arr.capacity = DA_DEFAULT_CAP;                                         \
+    else                                                                     \
+      arr.capacity *= 2;                                                     \
+    arr.items = realloc(arr.items, arr.capacity * sizeof(*arr.items));       \
+    if (arr.items == NULL) {                                                 \
+      ERROR("DA_PUSH fail: Realloc Error.");                                 \
+      exit(1);                                                               \
+    }                                                                        \
+  }                                                                          \
+  arr.items[arr.size++] = (elm);                                             \
+} while (0)
 
-#define DA_POP(arr)                                                            \
-  do {                                                                         \
-    if (arr.capacity > 0 && arr.size > 0) {                                    \
-      arr.size--;                                                              \
-    }                                                                          \
-  } while (0)
+#define DA_POP(arr)                                                          \
+do {                                                                         \
+  if (arr.capacity > 0 && arr.size > 0) {                                    \
+    arr.size--;                                                              \
+  }                                                                          \
+} while (0)
 
-#define DA_POP_AT(arr, pos)                                                    \
-  do {                                                                         \
-    if ((pos) < arr.size) {                                                    \
-      for (size_t i = (pos); i < (size_t)arr.size - 1; i++) {                  \
-        arr.items[i] = arr.items[i + 1];                                       \
-      }                                                                        \
-      arr.size--;                                                              \
-    }                                                                          \
-  } while (0)
+#define DA_POP_AT(arr, pos)                                                  \
+do {                                                                         \
+  if ((pos) < arr.size) {                                                    \
+    for (size_t i = (pos); i < (size_t)arr.size - 1; i++) {                  \
+      arr.items[i] = arr.items[i + 1];                                       \
+    }                                                                        \
+    arr.size--;                                                              \
+  }                                                                          \
+} while (0)
 
 #define DA_GET(arr, pos) ((pos) >= 0 ? arr.size > (pos) ? arr.items[(pos)] : arr.items[arr.size - 1] : arr.items[0])
 
-#define DA_PUSH_AT(arr, elm, pos)                                              \
+#define DA_PUSH_AT(arr, elm, pos)                                            \
+do {                                                                         \
+  if (arr.size + (pos) < arr.capacity) {                                     \
+    for (size_t i = arr.size; i > pos; i--) {                                \
+      arr.items[i] = arr.items[i - 1];                                       \
+    }                                                                        \
+    arr.items[pos] = elm;                                                    \
+  }                                                                          \
+} while (0)
+
+/* Implementation section */
+#ifdef CBONE_IMPL
+
+#define PATH(...) cbone_concat_str_array(path_sep, cbone_make_str_array(__VA_ARGS__, NULL))
+#define CONCAT(...) cbone_concat_str_array("", cbone_make_str_array(__VA_ARGS__, NULL))
+#define CMD(...)                                                               \
   do {                                                                         \
-    if (arr.size + (pos) < arr.capacity) {                                     \
-      for (size_t i = arr.size; i > pos; i--) {                                \
-        arr.items[i] = arr.items[i - 1];                                       \
-      }                                                                        \
-      arr.items[pos] = elm;                                                    \
-    }                                                                          \
+    Cmd arg = {.data = cbone_make_str_array(__VA_ARGS__, NULL)};               \
+    cbone_run_cmd(arg);                                                              \
+    free(arg.data.items);                                                      \
   } while (0)
 
 char *str_concat(char *s1, char *s2) {
   char *buffer = malloc(strlen(s1) + strlen(s2) + 1);
-  assert_with_errmsg(buffer != NULL, "Couldn't concat string.");
+  cbone_assert_with_errmsg(buffer != NULL, "Couldn't concat string.");
 
   strncat(buffer, s1, strlen(s1));
   strncat(buffer, s2, strlen(s2));
@@ -192,18 +197,18 @@ char *str_concat(char *s1, char *s2) {
   return buffer;
 }
 
-void assert_with_errmsg(int expr, char *errmsg) {
+void cbone_assert_with_errmsg(int expr, char *errmsg) {
   if (!expr) {
     printf("[ERROR]: %s\n", errmsg);
     exit(1);
   }
 }
 
-void info_cmd(char *msg) { printf("[INFO]: %s\n", msg); }
+void cbone_info_cmd(char *msg) { printf("[INFO]: %s\n", msg); }
 
-void print_cmd(char *cmd) { printf("[CMD]: %s\n", cmd); }
+void cbone_print_cmd(char *cmd) { printf("[CMD]: %s\n", cmd); }
 
-Str_Array make_str_array(char *first, ...) {
+Str_Array cbone_make_str_array(char *first, ...) {
   Str_Array result = {0};
 
   if (first == NULL) {
@@ -221,7 +226,7 @@ Str_Array make_str_array(char *first, ...) {
   va_end(args);
 
   result.items = malloc(sizeof(result.items[0]) * result.size);
-  assert_with_errmsg(result.items != NULL,
+  cbone_assert_with_errmsg(result.items != NULL,
                      "Couldn't allocate memory for string array.");
 
   result.size = 0;
@@ -242,7 +247,7 @@ Str_Array str_array_push(Str_Array s_arr, char *str) {
   Str_Array result = {.size = s_arr.size + 1};
 
   result.items = malloc(result.size);
-  assert_with_errmsg(result.items != NULL,
+  cbone_assert_with_errmsg(result.items != NULL,
                      "Coudln't push string to string array.");
 
   memcpy(result.items, s_arr.items, s_arr.size);
@@ -252,7 +257,7 @@ Str_Array str_array_push(Str_Array s_arr, char *str) {
   return result;
 }
 
-char *concat_str_array(char *sep, Str_Array s) {
+char *cbone_concat_str_array(char *sep, Str_Array s) {
   if (s.size == 0) {
     return "";
   }
@@ -267,7 +272,7 @@ char *concat_str_array(char *sep, Str_Array s) {
   }
 
   char *result = malloc((len + 1) * sizeof(char));
-  assert_with_errmsg(result != NULL, "Couldn't join string array.");
+  cbone_assert_with_errmsg(result != NULL, "Couldn't join string array.");
 
   result[0] = '\0';
 
@@ -281,9 +286,9 @@ char *concat_str_array(char *sep, Str_Array s) {
   return result;
 }
 
-int run_cmd(Build_Arg arg) {
-  char *cmd = concat_str_array(" ", arg.data);
-  print_cmd(cmd);
+int cbone_run_cmd(Cmd arg) {
+  char *cmd = cbone_concat_str_array(" ", arg.data);
+  cbone_print_cmd(cmd);
 #ifndef _WIN32
   pid_t pid = fork();
 
@@ -350,7 +355,7 @@ void fd_close(fd f) {
 #endif
 }
 
-int modified_after(char *f1, char *f2) {
+int cbone_modified_after(char *f1, char *f2) {
 #ifdef _WIN32
   FILETIME file1_time, file2_time;
   fd file1 = open_file(f1);
@@ -388,15 +393,78 @@ int modified_after(char *f1, char *f2) {
 #endif
 }
 
-#define REBUILD_SELF(argc, argv)                                               \
-  do {                                                                         \
-    assert_with_errmsg(argc >= 1, "no args... how?");                          \
-    char *src_file = __FILE__;                                                 \
-    char *target = argv[0];                                                    \
-    if (modified_after(src_file, target)) {                                    \
-      CMD(cc, "-o", target, src_file);                                         \
-    }                                                                          \
-  } while (0)
+#define REBUILD_SELF(argc, argv)                                             \
+do {                                                                         \
+  cbone_assert_with_errmsg(argc >= 1, "no args... how?");                    \
+  char *src_file = __FILE__;                                                 \
+  char *target = argv[0];                                                    \
+  if (cbone_modified_after(src_file, target)) {                              \
+    CMD(cc, "-o", target, src_file);                                         \
+  }                                                                          \
+} while (0)
+
+/*
+Returns if given path as an array of strings is a directory.
+Return values:
+  0: don't exists.
+  1: exists.
+  2: not a directory, but exists.*/
+int cbone_dir_exists(Str_Array Array_path) {
+  char *path = cbone_concat_str_array(path_sep, Array_path);
+  int result;
+#ifdef _WIN32
+  DWORD attr = GetFileAttributes(path);
+  if (attr == INVALID_FILE_ATTRIBUTES) {
+    // don't exists
+    result = 0;
+  } else if (attr & FILE_ATTRIBUTE_DIRECTORY) {
+    // is a directory
+    result = 1;
+  } else {
+    // is a file
+    result = 2;
+  }
+#else
+  struct stat statbuf;
+  if (stat(path, &statbuf) == 0) {
+    if (S_ISDIR(statbuf.st_mode)) {
+      // is a directory
+      result = 1;
+    } else {
+      // is a file
+      result = 2;
+    }
+  } else {
+    // don't exists
+    result = 0;
+  }
+#endif
+  free(path);
+  return result;
+}
+
+// makes a folder with given path in form of a string.
+int cbone_mkdir(char *path) {
+  int result;
+
+#ifdef _WIN32
+  result = _mkdir(path);
+#else
+  result = mkdir(path, 0755);
+#endif
+  return result;
+}
+
+// this function only delete empty directories
+// so if using to delete a folder with files, you should
+// delete all files in that folder
+int cbone_rmdir(char *path) {
+  #ifdef _WIN32
+    return RemoveDirectory(path);
+  #else
+    return rmdir(path) == 0;
+  #endif
+}
 
 #endif // CBONE_IMPL
 #endif // CBONE_H
