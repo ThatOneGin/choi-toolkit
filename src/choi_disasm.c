@@ -52,7 +52,7 @@ void disasm(instruction *program, size_t len) {
     printf("%lu  ", i);
     switch (c.opcode) {
     case OP_PUSH:
-      printf("opcode: %s, operand: %d, arg1: %d\n", opcode_as_str(c.opcode), c.operand.as_int, c.arg1);
+      printf("opcode: %s, operand: %lu, arg1: %d\n", opcode_as_str(c.opcode), c.operand, c.arg1);
       break;
     case OP_ADD:
       printf("opcode: %s, arg1: %d, arg2: %d\n", opcode_as_str(c.opcode), c.arg1, c.arg2);
@@ -70,13 +70,13 @@ void disasm(instruction *program, size_t len) {
       printf("opcode: %s, arg1: %d\n", opcode_as_str(c.opcode), c.arg1);
       break;
     case OP_JMP:
-      printf("opcode: %s, operand: %d\n", opcode_as_str(c.opcode), c.operand.as_int);
+      printf("opcode: %s, operand: %lu\n", opcode_as_str(c.opcode), c.operand);
       break;
     case OP_WRITE:
       printf("opcode: %s, arg1: %d\n", opcode_as_str(c.opcode), c.arg1);
       break;
     case OP_PUSH_ADDR:
-      printf("opcode: %s, operand %d, arg1: %d\n", opcode_as_str(c.opcode), c.operand.as_int, c.arg1);
+      printf("opcode: %s, operand %lu, arg1: %d\n", opcode_as_str(c.opcode), c.operand, c.arg1);
       break;
     case OP_CALL:
       printf("opcode: %s, arg1: %d, arg2: %d\n", opcode_as_str(c.opcode), c.arg1, c.arg2);
@@ -91,7 +91,7 @@ void disasm(instruction *program, size_t len) {
       printf("opcode: %s, arg1: %d\n", opcode_as_str(c.opcode), c.arg1);
       break;
     case OP_PUSH_STACK:
-      printf("opcode: %s, operand: %d\n", opcode_as_str(c.opcode), c.operand.as_int);
+      printf("opcode: %s, operand: %lu\n", opcode_as_str(c.opcode), c.operand);
       break;
     case OP_HALT:
       printf("opcode: %s\n", opcode_as_str(c.opcode));
@@ -100,10 +100,10 @@ void disasm(instruction *program, size_t len) {
       printf("opcode: %s, arg1: %d, arg2: %d\n", opcode_as_str(c.opcode), c.arg1, c.arg2);
       break;
     case OP_JNZ:
-      printf("opcode: %s, operand: %d\n", opcode_as_str(c.opcode), c.operand.as_int);
+      printf("opcode: %s, operand: %lu\n", opcode_as_str(c.opcode), c.operand);
       break;
     case OP_JZ:
-      printf("opcode: %s, operand: %d\n", opcode_as_str(c.opcode), c.operand.as_int);
+      printf("opcode: %s, operand: %lu\n", opcode_as_str(c.opcode), c.operand);
       break;
     default:
       printf("; Not Recognized ip: %lu\n", i);

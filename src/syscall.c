@@ -13,21 +13,21 @@ int check_for_syscall_kind(gsb_vm *vm) {
   char filename[256];
 
   // TODO: syscalls for windows
-  switch (vm->registers[0].as_int) {
+  switch (vm->registers[0]) {
     case choi_write:
-      vm->registers[0].as_int = write(vm->registers[1].as_int, vm->memory + pop_vm(vm), vm->registers[2].as_int);
+      vm->registers[0] = write(vm->registers[1], vm->memory + pop_vm(vm), vm->registers[2]);
       return 0;
     case choi_read:
       push_vm(vm, vm->size);
-      vm->registers[0].as_int = read(vm->registers[1].as_int, vm->memory + vm->size, vm->registers[2].as_int);
-      vm->size += (size_t) vm->registers[2].as_int;
+      vm->registers[0] = read(vm->registers[1], vm->memory + vm->size, vm->registers[2]);
+      vm->size += (size_t) vm->registers[2];
       return 0;
     case choi_open:
-      sprintf(filename, "%.*s", vm->registers[2].as_int, vm->memory + pop_vm(vm));
-      vm->registers[0].as_int = open(filename, vm->registers[1].as_int);
+      sprintf(filename, "%.*s", (int)vm->registers[2], vm->memory + pop_vm(vm));
+      vm->registers[0] = open(filename, vm->registers[1]);
       break;
     case choi_close:
-      close(vm->registers[1].as_int);
+      close(vm->registers[1]);
       return 0;
       break;
   }

@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "string.h"
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 int has_label(label_table *lb_t, Str name) {
@@ -98,46 +99,46 @@ instruction parse_line(Str ln, label_table *lb, size_t ip) {
     int reg = parse_register(str_trimlr(ln));
     int op = str_atoi(str_trims(ln));
 
-    return (instruction){.opcode = OP_PUSH, .operand = {.as_int = op}, .arg1 = reg, .arg2 = 0};
+    return (instruction){.opcode = OP_PUSH, .operand = op, .arg1 = reg, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("add"))) {
     ln = str_triml(ln);
     int reg1 = parse_register(str_trimlr(ln));
     int reg2 = parse_register(str_trims(ln));
 
-    return (instruction){.opcode = OP_ADD, .operand = {.as_int = 0},.arg1 = reg1, .arg2 = reg2};
+    return (instruction){.opcode = OP_ADD, .operand = 0,.arg1 = reg1, .arg2 = reg2};
   } else if (str_cmp(i_n, to_str("sub"))) {
     ln = str_triml(ln);
     int reg1 = parse_register(str_trimlr(ln));
     int reg2 = parse_register(str_trims(ln));
 
-    return (instruction){.opcode = OP_SUB, .operand = {.as_int = 0},.arg1 = reg1, .arg2 = reg2};
+    return (instruction){.opcode = OP_SUB, .operand = 0,.arg1 = reg1, .arg2 = reg2};
   } else if (str_cmp(i_n, to_str("mul"))) {
     ln = str_triml(ln);
     int reg1 = parse_register(str_trimlr(ln));
     int reg2 = parse_register(str_trims(ln));
 
-    return (instruction){.opcode = OP_MUL, .operand = {.as_int = 0},.arg1 = reg1, .arg2 = reg2};
+    return (instruction){.opcode = OP_MUL, .operand = 0,.arg1 = reg1, .arg2 = reg2};
   } else if (str_cmp(i_n, to_str("div"))) {
     ln = str_triml(ln);
     int reg1 = parse_register(str_trimlr(ln));
     int reg2 = parse_register(str_trims(ln));
 
-    return (instruction){.opcode = OP_DIV, .operand = {.as_int = 0},.arg1 = reg1, .arg2 = reg2};
+    return (instruction){.opcode = OP_DIV, .operand = 0,.arg1 = reg1, .arg2 = reg2};
   } else if (str_cmp(i_n, to_str("dump"))) {
     ln = str_triml(ln);
     int reg = parse_register(str_triml(ln));
-    return (instruction){.opcode = OP_DUMP, .operand = {.as_int = 0}, .arg1 = reg, .arg2 = 0};
+    return (instruction){.opcode = OP_DUMP, .operand = 0, .arg1 = reg, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("mov"))) {
     ln = str_triml(ln);
     int reg1 = parse_register(str_trimlr(ln));
     int reg2 = parse_register(str_trims(ln));
     
-    return (instruction){.opcode = OP_MOV, .operand = {.as_int = 0}, .arg1 = reg1, .arg2 = reg2};
+    return (instruction){.opcode = OP_MOV, .operand = 0, .arg1 = reg1, .arg2 = reg2};
   } else if (str_cmp(i_n, to_str("drop"))) {
     ln = str_triml(ln);
     int reg = parse_register(str_triml(ln));
 
-    return (instruction){ .opcode = OP_DROP, .operand = {.as_int = 0}, .arg1 = reg, .arg2 = 0};
+    return (instruction){ .opcode = OP_DROP, .operand = 0, .arg1 = reg, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("jmp"))) {
     ln = str_triml(ln);
     Str name = str_trimlr(ln);
@@ -147,7 +148,7 @@ instruction parse_line(Str ln, label_table *lb, size_t ip) {
       push_addr(lb, (unknown_operand){.addr = ip, .name = name});
     }
     
-    return (instruction){.opcode = OP_JMP, .operand = {.as_int = to_jmp}, .arg1 = 0, .arg2 = 0};
+    return (instruction){.opcode = OP_JMP, .operand = to_jmp, .arg1 = 0, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("jz"))) {
     ln = str_triml(ln);
     Str name = str_trimlr(ln);
@@ -158,7 +159,7 @@ instruction parse_line(Str ln, label_table *lb, size_t ip) {
       push_addr(lb, (unknown_operand){.addr = ip, .name = name});
     }
     
-    return (instruction){.opcode = OP_JZ, .operand = {.as_int = to_jmp}, .arg1 = 0, .arg2 = 0};
+    return (instruction){.opcode = OP_JZ, .operand = to_jmp, .arg1 = 0, .arg2 = 0};
   }  else if (str_cmp(i_n, to_str("jnz"))) {
     ln = str_triml(ln);
     Str name = str_trimlr(ln);
@@ -168,7 +169,7 @@ instruction parse_line(Str ln, label_table *lb, size_t ip) {
       push_addr(lb, (unknown_operand){.addr = ip, .name = name});
     }
     
-    return (instruction){.opcode = OP_JNZ, .operand = {.as_int = to_jmp}, .arg1 = 0, .arg2 = 0};
+    return (instruction){.opcode = OP_JNZ, .operand = to_jmp, .arg1 = 0, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("call"))) {
     ln = str_triml(ln);
     Str name = str_trimlr(ln);
@@ -179,33 +180,33 @@ instruction parse_line(Str ln, label_table *lb, size_t ip) {
       push_addr(lb, (unknown_operand){.addr = ip, .name = name});
     }
     
-    return (instruction){.opcode = OP_CALL, .operand = {.as_int = 0}, .arg1 = arg1, .arg2 = ip};
+    return (instruction){.opcode = OP_CALL, .operand = 0, .arg1 = arg1, .arg2 = ip};
   } else if (str_cmp(i_n, to_str("ret"))) {
     ln = str_triml(ln);
-    return (instruction){.opcode = OP_RET, .operand = {.as_int = 0}, .arg1 = 0, .arg2 = 0};
+    return (instruction){.opcode = OP_RET, .operand = 0, .arg1 = 0, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("write"))) {
     ln = str_triml(ln);
     int reg = parse_register(str_triml(ln));
-    return (instruction){.opcode = OP_WRITE, .operand = {0}, .arg1 = reg, .arg2 = 0};
+    return (instruction){.opcode = OP_WRITE, .operand = 0, .arg1 = reg, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("syscall"))) {
     ln = str_triml(ln);
-    return (instruction){.opcode = OP_SYSCALL, .operand = {0}, .arg1 = 0, .arg2 = 0};
+    return (instruction){.opcode = OP_SYSCALL, .operand = 0, .arg1 = 0, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("halt"))) {
     ln = str_triml(ln);
-    return (instruction){.opcode = OP_HALT, .operand = {0}, .arg1 = 0, .arg2 = 0};
+    return (instruction){.opcode = OP_HALT, .operand = 0, .arg1 = 0, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("cmp"))) {
     ln = str_triml(ln);
 
     int reg1 = parse_register(str_triml(ln));
     int reg2 = parse_register(str_trims(ln));
 
-    return (instruction){.opcode = OP_CMP, .operand = {0}, .arg1 = reg1, .arg2 = reg2};
+    return (instruction){.opcode = OP_CMP, .operand = 0, .arg1 = reg1, .arg2 = reg2};
   } else if (str_cmp(i_n, to_str("inc"))) {
     ln = str_triml(ln);
 
     int reg1 = parse_register(str_triml(ln));
 
-    return (instruction){.opcode = OP_INC, .operand = {0}, .arg1 = reg1, .arg2 = 0};
+    return (instruction){.opcode = OP_INC, .operand = 0, .arg1 = reg1, .arg2 = 0};
   } else {
     printf("Unknown instruction '%.*s'\n", (int)i_n.size, i_n.data);
     exit(1);
@@ -237,12 +238,12 @@ void parse_special_operands(Str ln, choi_asm *ca, size_t ip, Arena *strArena) {
     if (*str_trims(ln).data == '"') {
       Str str = parse_str(str_trims(ln), strArena);
 
-      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH_ADDR, .operand = {.as_int = ca->size}, .arg1 = reg, .arg2 = 0};
+      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH_ADDR, .operand = ca->size, .arg1 = reg, .arg2 = 0};
       push_str_to_memory(ca, str);
-      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH, .operand = {.as_int = str.size}, .arg1 = reg, .arg2 = 0};
+      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH, .operand = str.size, .arg1 = reg, .arg2 = 0};
     } else {
       int integer = str_atoi(str_trims(ln));
-      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH_ADDR, .operand = {.as_int = ca->size}, .arg1 = reg, .arg2 = 0};
+      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH_ADDR, .operand = ca->size, .arg1 = reg, .arg2 = 0};
       memcpy(ca->memory, &integer, 1);
       ca->size += 1;
     }
@@ -250,17 +251,17 @@ void parse_special_operands(Str ln, choi_asm *ca, size_t ip, Arena *strArena) {
     ln = str_triml(ln);
     int reg = parse_register(str_trimlr(ln));
 
-    ca->program[ca->program_size++] = (instruction){.opcode = OP_POP_STACK, .operand = {.as_int = 0}, .arg1 = reg, .arg2 = 0};
+    ca->program[ca->program_size++] = (instruction){.opcode = OP_POP_STACK, .operand = 0, .arg1 = reg, .arg2 = 0};
   } else if (str_cmp(i_n, to_str("@push"))) {
     ln = str_triml(ln);
     int op;
 
     if (*str_triml(ln).data != 'R') {
       op = str_atoi(str_triml(ln));
-      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH_STACK, .operand = {.as_int = op}, .arg1 = 0, .arg2 = 0};
+      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH_STACK, .operand = op, .arg1 = 0, .arg2 = 0};
     } else {
       op = parse_register(str_trimlr(ln));
-      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH_STACK, .operand = {.as_int = op}, .arg1 = 1, .arg2 = 0};
+      ca->program[ca->program_size++] = (instruction){.opcode = OP_PUSH_STACK, .operand = op, .arg1 = 1, .arg2 = 0};
     }
   } else {
     printf("Special operand not recognized '%.*s'\n", (int)i_n.size, i_n.data);
@@ -303,7 +304,7 @@ size_t parse_file(Str source, choi_asm *ca, choi_header *ch, Arena *strArena) {
     if (ca->program[uo.addr].opcode == OP_CALL) {
       ca->program[uo.addr].arg1 = label_addr;
     } else {
-      ca->program[uo.addr].operand.as_int = label_addr;
+      ca->program[uo.addr].operand = label_addr;
     }
   }
   

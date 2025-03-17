@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     .lb = lb,
     .program = {0},
     // memory_cap
-    .capacity = 0,
+    .capacity = 1000,
     .program_capacity = 1000,
   };
 

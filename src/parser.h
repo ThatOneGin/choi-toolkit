@@ -1,5 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
+#include "choivm.h"
 #include "string.h"
 
 typedef struct {
@@ -20,7 +21,7 @@ typedef struct {
 } label_table;
 
 typedef struct {
-  unsigned char *memory;
+  unsigned char memory[vm_capacity];
   size_t capacity;
   size_t size;
 

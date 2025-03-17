@@ -101,7 +101,7 @@ void writefile(const char *filename, instruction *program, choi_asm ca, choi_hea
     exit(1);
   }
 
-  fwrite(&ch, sizeof(choi_header), 1, f);
+  fwrite(&ch, sizeof(ch), 1, f);
   fwrite(program, sizeof(instruction), ch.program_size, f);
   fwrite(ca.memory, sizeof(*ca.memory), ca.size, f);
 

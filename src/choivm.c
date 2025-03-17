@@ -27,7 +27,7 @@ gsb_vm gsb_vm_init(Arena arena) {
 void dump_registers(gsb_vm vm) {
   printf("[\n");
   for (int i = 0; i < r_count; i++) {
-    printf("  register R%d: [as_int: %d, as_ptr: %p]\n", i+1, vm.registers[i].as_int, vm.registers[i].as_ptr);
+    printf("  register R%d: [%lu]\n", i+1, vm.registers[i]);
   }
   printf("]\n");
 }
@@ -35,14 +35,14 @@ void dump_registers(gsb_vm vm) {
 void dump_stack(gsb_vm vm) {
   printf("stack: [ ");
   for (size_t i = 0; i < vm.sp; i++) {
-    printf("%d ", vm.stack[i]);
+    printf("%lu ", vm.stack[i]);
   }
   printf("]\n");
 }
 
 void set_registers_to_zero(gsb_vm *vm) {
   for (int i = 0; i < r_count; i++) {
-    vm->registers[i] = (value) {.as_int = 0};
+    vm->registers[i] = (value) 0;
   }
 }
 

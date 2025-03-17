@@ -1,5 +1,6 @@
 #ifndef gsb_h
 #define gsb_h
+#include <stdint.h>
 #include <stdio.h>
 #include "arena.h"
 
@@ -20,11 +21,14 @@ enum Registers {
   r8,
   r_count
 };
-
+/**
 typedef union {
   int as_int;
   void *as_ptr;
 } value;
+*/
+
+typedef uintptr_t value;
 
 typedef struct {
   int magic;
@@ -56,7 +60,7 @@ typedef struct {
     OP_CMP,
     OP_JZ,
     OP_JNZ,
-    OP_INC
+    OP_INC,
   }opcode;
   
   value operand;
@@ -70,7 +74,7 @@ typedef struct {
   int *ret_stack;
   size_t ret_sp;
   
-  int *stack;
+  uintptr_t *stack;
   size_t sp;
 
   size_t ip;
@@ -81,8 +85,8 @@ typedef struct {
 }gsb_vm;
 
 gsb_vm gsb_vm_init(Arena arena);
-void push_vm(gsb_vm *vm, int value);
-int pop_vm(gsb_vm *vm);
+void push_vm(gsb_vm *vm, uintptr_t value);
+uintptr_t pop_vm(gsb_vm *vm);
 void ret_push_vm(gsb_vm *vm, int value);
 int ret_pop_vm(gsb_vm *vm);
 void exec(gsb_vm *vm, instruction i);
