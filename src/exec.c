@@ -31,12 +31,11 @@ uintptr_t pop_vm(gsb_vm *vm) {
 }
 
 void ret_push_vm(gsb_vm *vm, int value) {
-  if (vm->ret_sp >= 100) {
+  if (vm->ret_sp >= ret_stack_cap) {
     printf("ERROR: Ret Stack overflow at ip: %lu\n", vm->ip);
     exit(1);
   }
-  vm->ret_stack[vm->ret_sp] = value;
-  vm->ret_sp++;
+  vm->ret_stack[vm->ret_sp++] = value;
 }
 
 int ret_pop_vm(gsb_vm *vm) {

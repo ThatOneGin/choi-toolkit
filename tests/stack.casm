@@ -1,0 +1,18 @@
+@proc _start
+  ; initialize stack
+  @push 0
+
+  @push 13
+  @push 12
+@proc op_1
+  @pop R1
+  @pop R2
+@proc op_3
+  add R1 R2
+  dump R1
+@proc program_end
+  ret
+
+@proc main
+  call _start
+  halt

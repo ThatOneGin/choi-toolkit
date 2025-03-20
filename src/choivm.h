@@ -9,6 +9,7 @@
 #define choi_version 01
 #define magic_number 255
 #define vm_capacity 2 * 1000
+#define ret_stack_cap 100
 
 enum Registers {
   r1,

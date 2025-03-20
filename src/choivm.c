@@ -14,10 +14,11 @@ gsb_vm gsb_vm_init(Arena arena) {
   vm.stack = alloc(&arena, 1024);
   vm.sp = 0;
   
-  vm.ret_stack = alloc(&arena, 100);
+  vm.ret_stack = alloc(&arena, ret_stack_cap);
   vm.ret_sp = 0;
 
   if (vm.ret_stack == NULL) {
+    printf("Couldn't allocate procedure stack.");
     free(arena.mem);
     exit(1);
   }
