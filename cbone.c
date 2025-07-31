@@ -19,11 +19,11 @@ static char *files[] = {
 #define nfiles 9
 
 void build_objfile(char *tool) {
-  Str_Array buildsep = cbone_make_str_array("build", CONCAT(tool, ".o"), NULL);
-  Str_Array target = cbone_make_str_array(tool, ".c", NULL);
+  cbone_str_array buildsep = cbone_make_str_array("build", CONCAT(tool, ".o"), NULL);
+  cbone_str_array target = cbone_make_str_array(tool, ".c", NULL);
   char *aspath = cbone_concat_str_array(path_sep, buildsep);
   char *targetdotc = cbone_concat_str_array("", target);
-  Str_Array srcpath = cbone_make_str_array("src", targetdotc, NULL);
+  cbone_str_array srcpath = cbone_make_str_array("src", targetdotc, NULL);
   char *srcdotc = cbone_concat_str_array(path_sep, srcpath);
 
   CMD(cc, "-c", "-o", aspath, srcdotc, CFLAGS);
